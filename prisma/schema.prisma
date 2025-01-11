@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Type {
+  ASSET
+  LIABILITY
+
+  @@map("object_type")
+}
+
+model Object {
+  id        String   @id @default(cuid())
+  owner     String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  name      String
+  type      Type
+
+  unitCountProvider String @map("unit_count_provider")
+  unitValueProvider String @map("unit_value_provider")
+
+  entries Entry[]
+
+  @@map("user_object")
+}
+
+model Entry {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  unitValue       Decimal @map("unit_value")
+  unitValueSource String  @map("unit_value_source")
+
+  unitCount       Decimal @map("unit_count")
+  unitCountSource String  @map("unit_count_source")
+
+  totalValue       Decimal @map("total_value")
+  totalValueSource String  @map("total_value_source")
+
+  currencyCode String @map("currency_code")
+
+  additionalData Json? @map("additional_data")
+
+  object   Object @relation(fields: [objectId], references: [id], onDelete: Cascade)
+  objectId String @map("object_id")
+
+  @@map("ledger_entry")
+}

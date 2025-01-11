@@ -1,3 +1,4 @@
+import { auth } from "@/auth";
 import {
   Card,
   CardContent,
@@ -8,6 +9,8 @@ import {
 import { Charts } from "./components/Charts";
 
 export default async function Overview() {
+  const session = await auth();
+
   return (
     <>
       <Card>
@@ -17,6 +20,11 @@ export default async function Overview() {
             <div className="text-xl font-bold">+$6,723,195.58</div>
             <div className="text-sm">Last valuation 11 Jan, 2025</div>
           </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent>
+          <div className="mt-6">{JSON.stringify(session)}</div>
         </CardContent>
       </Card>
       <Card>
