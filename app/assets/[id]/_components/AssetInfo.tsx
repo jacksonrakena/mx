@@ -29,6 +29,7 @@ import {
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
+  getSortedRowModel,
   Table as TanstackTable,
   useReactTable,
 } from "@tanstack/react-table";
@@ -68,6 +69,7 @@ export const columns: ColumnDef<EntryRow>[] = [
   {
     accessorKey: "unitsHeld",
     header: "Units held",
+    cell: ({ row }) => row.getValue<Decimal>("unitsHeld").toNumber(),
   },
   {
     accessorKey: "unitValue",
@@ -160,6 +162,10 @@ export const AssetInfo = ({
   const router = useRouter();
   const table = useReactTable({
     columns: columns,
+    getSortedRowModel: getSortedRowModel(),
+    state: {
+      sorting: [{ id: "dateHeld", desc: true }],
+    },
     data: asset.entries.map(
       (entry) =>
         ({
@@ -244,7 +250,9 @@ export const AssetInfo = ({
                     </TableBody>
                   </Table>
                 </div>
-                <DataTablePagination table={table} />
+                {table.getRowCount() !== 0 && (
+                  <DataTablePagination table={table} />
+                )}
               </div>
             </DialogDescription>
             <CreateEntry assetId={asset.id} />

@@ -30,7 +30,7 @@ import { CalendarIcon } from "lucide-react";
 import { useRef } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { test } from "../actions";
+import { createLedgerEntry } from "../actions";
 const createEntrySchema = z.object({
   date: z.date(),
   unitCount: z.number({ coerce: true }).nonnegative(),
@@ -51,7 +51,7 @@ export const CreateEntry = ({ assetId }: { assetId: string }) => {
 
   const formRef = useRef<HTMLFormElement>(null);
 
-  const sendWithAssetId = test.bind(null, assetId);
+  const sendWithAssetId = createLedgerEntry.bind(null, assetId);
   return (
     <Form {...form}>
       <form

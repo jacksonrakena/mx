@@ -17,7 +17,6 @@ export default async function AssetInfoPage({
     },
   });
   if (!asset) return <>Not found</>;
-  console.log(asset.entries[0].unitCount);
   return (
     <>
       <AssetInfo

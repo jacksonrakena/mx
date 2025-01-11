@@ -27,7 +27,7 @@ export async function deleteLedgerEntry(objectId: string, entryId: string) {
   return { status: "ok" };
 }
 
-export async function test(assetId: string, formData: any) {
+export async function createLedgerEntry(assetId: string, formData: any) {
   const session = await auth();
   if (!session || !session.user?.email) return;
   const result = createEntrySchema.safeParse(formData);
@@ -62,5 +62,6 @@ export async function test(assetId: string, formData: any) {
       createdAt: data.date,
     },
   });
+  revalidatePath(`/assets/${assetId}`);
   return { message: "success" };
 }
