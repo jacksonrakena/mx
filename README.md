@@ -9,6 +9,8 @@ Principled means the following:
    2. Not only is this dangerous - but it [violates your bank's terms & conditions](https://www.consumer.org.nz/articles/poli-payments-how-it-affects-and-breaches-your-banking-security), leaving you open to possible consequences.
    3. Additionally, these services aren't upfront about this behaviour. Some of them impersonate your bank's login page, and don't say anywhere that they're recording your banking credentials.
 
+### Architecture
+![alt text](image-1.png)
 
 ### Design goals
 * Automation - use open banking APIs, if possible
