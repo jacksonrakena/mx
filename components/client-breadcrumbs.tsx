@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useSelectedLayoutSegments } from "next/navigation";
 import { useMemo } from "react";
-import { RouteData } from "./app-sidebar";
+import { RouteData } from "./data";
 import {
   Breadcrumb,
   BreadcrumbItem,
