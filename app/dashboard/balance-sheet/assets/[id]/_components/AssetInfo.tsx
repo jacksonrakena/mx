@@ -52,7 +52,7 @@ export const AssetInfo = ({
                         <TableCell>
                           {entry.createdAt.toLocaleDateString()}
                         </TableCell>
-                        <TableCell>{entry.unitCount}</TableCell>
+                        <TableCell>{entry.unitCount.toString()}</TableCell>
                         <TableCell>
                           {entry.currencyCode}$
                           {entry.unitValue.toLocaleString()}

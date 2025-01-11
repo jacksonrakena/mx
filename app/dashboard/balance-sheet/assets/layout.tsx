@@ -19,11 +19,13 @@ export type ObjectWithLatestEntry = {
   entry: Prisma.EntryGetPayload<{}>;
 };
 
-const conversionFactors = {
+const conversionFactors: { [x: string]: number } = {
   USD: 1.8,
   AUD: 1.11,
 };
-export default async function Assets({ children }) {
+export default async function Assets({
+  children,
+}: React.PropsWithChildren<{}>) {
   const session = await auth();
   const objects = await prisma.object.findMany({
     where: {

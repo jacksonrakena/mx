@@ -46,7 +46,7 @@ export const CreateAsset = () => {
       <form
         onSubmit={form.handleSubmit(() => formRef.current?.submit())}
         ref={formRef}
-        action={createAsset}
+        action={createAsset as any}
         className="space-y-8"
       >
         <FormField

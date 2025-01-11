@@ -19,16 +19,18 @@ export default async function AssetInfoPage({
   return (
     <>
       <AssetInfo
-        asset={{
-          ...asset,
-          entries: asset?.entries.map((e) => ({
-            ...e,
-            unitCount: e.unitCount.toNumber(),
-            unitValue: e.unitValue.toNumber(),
-            totalValue: e.totalValue.toNumber(),
-            additionalData: {},
-          })),
-        }}
+        asset={
+          {
+            ...asset,
+            entries: asset?.entries.map((e) => ({
+              ...e,
+              unitCount: e.unitCount.toNumber(),
+              unitValue: e.unitValue.toNumber(),
+              totalValue: e.totalValue.toNumber(),
+              additionalData: {},
+            })),
+          } as any
+        }
       />
     </>
   );
