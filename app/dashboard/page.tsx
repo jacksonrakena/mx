@@ -236,28 +236,6 @@ export default async function Overview() {
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>Assets</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p>Card Content</p>
-        </CardContent>
-        <CardFooter>
-          <p>Card Footer</p>
-        </CardFooter>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Liabilities</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p>Card Content</p>
-        </CardContent>
-        <CardFooter>
-          <p>Card Footer</p>
-        </CardFooter>
-      </Card>
-      <Card>
-        <CardHeader>
           <CardTitle>Liabilities</CardTitle>
         </CardHeader>
         <CardContent>
