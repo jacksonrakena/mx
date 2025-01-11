@@ -92,9 +92,7 @@ export default async function Assets({
             <TableRow key={row.object.id}>
               <TableCell className="font-medium">{row.object.type}</TableCell>
               <TableCell>
-                <Link href={`/dashboard/balance-sheet/assets/${row.object.id}`}>
-                  {row.object.name}
-                </Link>
+                <Link href={`/assets/${row.object.id}`}>{row.object.name}</Link>
               </TableCell>
               {row.entry ? (
                 <>

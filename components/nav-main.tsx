@@ -47,7 +47,7 @@ export function NavMain({
               {item.items?.length === 0 ? (
                 <>
                   <SidebarMenuButton asChild>
-                    <Link href={"/dashboard/balance-sheet/" + item.url}>
+                    <Link href={"/" + item.url}>
                       {item.icon && <item.icon />}
                       <span>{item.title}</span>
                     </Link>
@@ -67,14 +67,7 @@ export function NavMain({
                       {item.items?.map((subItem) => (
                         <SidebarMenuSubItem key={subItem.title}>
                           <SidebarMenuSubButton asChild>
-                            <Link
-                              href={
-                                "/dashboard/balance-sheet/" +
-                                item.url +
-                                "/" +
-                                subItem.url
-                              }
-                            >
+                            <Link href={"/" + item.url + "/" + subItem.url}>
                               <span>{subItem.title}</span>
                             </Link>
                           </SidebarMenuSubButton>

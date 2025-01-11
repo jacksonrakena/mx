@@ -49,7 +49,6 @@ export const ClientBreadcrumbs = ({
       routes.map((segment, idx) => {
         const isLast = routes.length - 1 === idx;
         const precedingSegments = routes.slice(0, idx + 1);
-
         let start = { title: "Home", url: "", items: routeTable };
         for (const segment of precedingSegments) {
           const candidate = start.items.find(
@@ -71,7 +70,7 @@ export const ClientBreadcrumbs = ({
           <BreadcrumbRouteComponent
             key={idx}
             title={start.title}
-            route={"/dashboard/" + precedingSegments.join("/")}
+            route={"/" + precedingSegments.join("/")}
             isLast={routes.length - 1 === idx}
           />
         );

@@ -29,7 +29,7 @@ export const AssetInfo = ({
       <Dialog
         open={true}
         onOpenChange={() => {
-          router.push(`/dashboard/balance-sheet/assets/`);
+          router.push(`/assets`);
         }}
       >
         <DialogContent>

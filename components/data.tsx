@@ -1,31 +1,5 @@
 export type RouteData = typeof routeTable;
 
-export const assetsRoute = {
-  title: "Assets",
-  url: "assets",
-  items: [
-    {
-      title: "Securities",
-      url: "securities",
-      items: [],
-    },
-    {
-      title: "Property",
-      url: "property",
-      items: [],
-    },
-    {
-      title: "Cash and equivalents",
-      url: "cash",
-      items: [],
-    },
-    {
-      title: "Credits",
-      url: "credits",
-      items: [],
-    },
-  ],
-};
 export const liabilitiesRoute = {
   title: "Liabilities",
   url: "liabilities",
@@ -49,16 +23,10 @@ export const liabilitiesRoute = {
 };
 export const routeTable = [
   {
-    title: "Balance sheet",
-    url: "balance-sheet",
-    items: [
-      {
-        title: "Overview",
-        url: "",
-        items: [],
-      },
-      assetsRoute,
-      liabilitiesRoute,
-    ],
+    title: "Home",
+    url: "/",
+    items: [],
   },
+  { title: "Assets & liabilities", url: "assets", items: [] },
+  // liabilitiesRoute,
 ];

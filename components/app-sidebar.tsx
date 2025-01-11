@@ -3,7 +3,6 @@
 import * as React from "react";
 
 import { NavMain } from "@/components/nav-main";
-import { NavProjects } from "@/components/nav-projects";
 import { NavUser } from "@/components/nav-user";
 import { TeamSwitcher } from "@/components/team-switcher";
 import {
@@ -173,8 +172,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavUser />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={routeTable[0].items} />
-        <NavProjects projects={data.projects} />
+        <NavMain items={routeTable} />
       </SidebarContent>
       <SidebarFooter>
         <TeamSwitcher teams={data.teams} />
