@@ -5,13 +5,6 @@ import {
 } from "@/components/custom/CustomTable";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -19,54 +12,75 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Prisma } from "@prisma/client";
 import {
   ColumnDef,
   getCoreRowModel,
   getPaginationRowModel,
-  getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import { Decimal } from "decimal.js";
 import { MoreHorizontal } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { conversionFactors } from "../../layout";
-import { deleteLedgerEntry } from "../actions";
-import { CreateEntry } from "./CreateEntry";
+import Link from "next/link";
+import { useEffect } from "react";
+import { deleteAsset } from "../actions";
 
-export type EntryRow = {
+type EntryRow = {
   id: string;
-  objectId: string;
-  dateHeld: Date;
-  unitsHeld: Decimal;
-  unitValue: Decimal;
-  totalValue: Decimal;
-  totalValueBaseCurrency: Decimal;
-  currencyCode: String;
+  name: string;
+  type: string;
+  unitsHeld?: string;
+  unitValue?: string;
+  totalValue?: string;
+  totalValueBaseCurrency?: string;
+  totalValueBaseCurrencySortable: number;
+  currencyCode?: string;
+  lastEntryDate?: Date;
 };
 
 export const columns: ColumnDef<EntryRow>[] = [
   {
-    accessorKey: "dateHeld",
-    header: "Date",
-    cell: ({ row }) => {
-      const value = row.getValue<Date>("dateHeld");
-      return value.toLocaleDateString();
-    },
+    accessorKey: "type",
+    header: "Type",
+    cell: ({ renderValue }) => (
+      <span className="font-medium">{renderValue<any>()}</span>
+    ),
+  },
+  {
+    accessorKey: "name",
+    header: "Name",
+    cell: ({ row }) => (
+      <Link href={`/assets/${row.original.id}`}>{row.original.name}</Link>
+    ),
   },
   {
     accessorKey: "unitsHeld",
     header: "Units held",
-    cell: ({ row }) => row.getValue<Decimal>("unitsHeld").toNumber(),
+    cell: ({ row }) => {
+      const value = row.getValue<string>("unitsHeld");
+      if (value) return new Decimal(value).toNumber();
+      return "";
+    },
   },
   {
     accessorKey: "unitValue",
     header: "Unit value",
+    cell: ({ row }) => {
+      if (!row.original.unitValue || !row.original.currencyCode) return "";
+      return new Intl.NumberFormat("en-NZ", {
+        style: "currency",
+        currency: row.original.currencyCode as any,
+      }).format(new Decimal(row.original.unitValue).toNumber());
+    },
   },
   {
     accessorKey: "totalValue",
     header: "Total value",
     cell: ({ row, cell }) => {
+      if (
+        !cell.row.original.totalValue ||
+        !cell.row.original.totalValueBaseCurrency
+      )
+        return "";
       const currencyCode = cell.row.original.currencyCode as string;
       const formatter = new Intl.NumberFormat("en-NZ", {
         style: "currency",
@@ -78,7 +92,7 @@ export const columns: ColumnDef<EntryRow>[] = [
               new Decimal(row.getValue<string>("totalValue")).toNumber()
             )
           : formatter.format(
-              cell.row.original.totalValueBaseCurrency.toNumber()
+              new Decimal(cell.row.original.totalValueBaseCurrency).toNumber()
             );
       const formatted = new Intl.NumberFormat("en-NZ", {
         style: "currency",
@@ -101,6 +115,14 @@ export const columns: ColumnDef<EntryRow>[] = [
     },
   },
   {
+    accessorKey: "lastEntryDate",
+    header: "Last valued",
+    cell: ({ row }) => {
+      const value = row.getValue<Date>("lastEntryDate");
+      return value?.toLocaleDateString();
+    },
+  },
+  {
     id: "actions",
     cell: ({ row }) => {
       const entry = row.original;
@@ -118,7 +140,7 @@ export const columns: ColumnDef<EntryRow>[] = [
             <DropdownMenuItem
               onClick={() => navigator.clipboard.writeText(entry.id)}
             >
-              Copy valuation ID
+              Copy asset ID
             </DropdownMenuItem>
             <DropdownMenuItem></DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -126,10 +148,7 @@ export const columns: ColumnDef<EntryRow>[] = [
             <DropdownMenuItem
               onClick={() => {
                 (async () => {
-                  await deleteLedgerEntry(
-                    row.original.objectId,
-                    row.original.id
-                  );
+                  await deleteAsset(row.original.id);
                 })();
               }}
             >
@@ -142,61 +161,26 @@ export const columns: ColumnDef<EntryRow>[] = [
   },
 ];
 
-export const AssetInfo = ({
-  asset,
-}: {
-  asset: Prisma.ObjectGetPayload<{ include: { entries: true } }>;
-}) => {
-  const router = useRouter();
+export const AssetTable = ({ data }: { data: EntryRow[] }) => {
   const table = useReactTable({
     columns: columns,
-    getSortedRowModel: getSortedRowModel(),
-    state: {
-      sorting: [{ id: "dateHeld", desc: true }],
-    },
-    data: asset.entries.map(
-      (entry) =>
-        ({
-          currencyCode: entry.currencyCode,
-          dateHeld: entry.createdAt,
-          id: entry.id,
-          objectId: entry.objectId,
-          totalValue: new Decimal(entry.totalValue),
-          totalValueBaseCurrency:
-            entry.currencyCode === "NZD"
-              ? new Decimal(0)
-              : new Decimal(entry.totalValue).mul(
-                  conversionFactors[entry.currencyCode]
-                ),
-          unitsHeld: new Decimal(entry.unitCount),
-          unitValue: new Decimal(entry.unitValue),
-        } as EntryRow)
+    data: data.toSorted((a, b) =>
+      new Decimal(b.totalValueBaseCurrency ?? 0)
+        .sub(a.totalValueBaseCurrency ?? 0)
+        .toNumber()
     ),
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
+
+  useEffect(() => {
+    table.setPageSize(5);
+  }, []);
   return (
     <>
-      <Dialog
-        open={true}
-        onOpenChange={() => {
-          router.push(`/assets`);
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{asset?.name}</DialogTitle>
-            <DialogDescription>
-              <CustomTable table={table} columns={columns}>
-                {table.getRowCount() !== 0 && (
-                  <DataTablePagination table={table} />
-                )}
-              </CustomTable>
-            </DialogDescription>
-            <CreateEntry assetId={asset.id} />
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
+      <CustomTable table={table} columns={columns}>
+        {table.getRowCount() !== 0 && <DataTablePagination table={table} />}
+      </CustomTable>
     </>
   );
 };

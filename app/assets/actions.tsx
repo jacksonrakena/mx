@@ -1,6 +1,7 @@
 "use server";
 import { auth } from "@/auth";
 import { PrismaClient } from "@prisma/client";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 const prisma = new PrismaClient();
@@ -9,6 +10,20 @@ const createAssetSchema = z.object({
   type: z.enum(["ASSET", "LIABILITY"]),
   provider: z.enum(["Manual entry"]),
 });
+export async function deleteAsset(assetId: string) {
+  const session = await auth();
+  if (!session || !session.user?.email) return;
+  const entry = await prisma.object.delete({
+    where: {
+      id: assetId,
+      AND: { owner: session.user.email },
+    },
+  });
+  if (!entry) return { error: "unauthorised" };
+
+  revalidatePath(`/assets`);
+  return { status: "ok" };
+}
 export async function createAsset(formData: FormData) {
   const session = await auth();
   if (!session || !session.user?.email) return { error: "unauthorized" };

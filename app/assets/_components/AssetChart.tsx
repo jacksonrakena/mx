@@ -34,7 +34,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export const AssetChart = async ({
+export const AssetChart = ({
   data,
   lines,
 }: {

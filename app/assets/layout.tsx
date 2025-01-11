@@ -1,15 +1,8 @@
 import { auth } from "@/auth";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Prisma, PrismaClient } from "@prisma/client";
-import Link from "next/link";
+import { calculateBaseValue } from "../page";
 import { AssetChart } from "./_components/AssetChart";
+import { AssetTable } from "./_components/AssetTable";
 import { CreateAsset } from "./_components/CreateAsset";
 
 const prisma = new PrismaClient();
@@ -76,100 +69,30 @@ export default async function Assets({
   return (
     <>
       <div className="text-xl font-bold">Your assets</div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[100px]">Type</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Units</TableHead>
-            <TableHead>Unit value</TableHead>
-            <TableHead>Total value</TableHead>
-            <TableHead>Last valued</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {joined.map((row) => (
-            <TableRow key={row.object.id}>
-              <TableCell className="font-medium">{row.object.type}</TableCell>
-              <TableCell>
-                <Link href={`/assets/${row.object.id}`}>{row.object.name}</Link>
-              </TableCell>
-              {row.entry ? (
-                <>
-                  {" "}
-                  <TableCell>{row.entry?.unitCount.toString()}</TableCell>
-                  <TableCell>
-                    {row.entry?.currencyCode}$
-                    {row.entry?.unitValue.toNumber().toLocaleString()}
-                  </TableCell>
-                  <TableCell>
-                    {row.entry.currencyCode !== "NZD" ? (
-                      <>
-                        <div className="flex flex-col">
-                          <span>
-                            NZD$
-                            {(
-                              row.entry?.totalValue.toNumber() *
-                              conversionFactors[row.entry?.currencyCode]
-                            ).toLocaleString()}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {row.entry?.currencyCode}$
-                            {row.entry?.totalValue.toNumber().toLocaleString()}
-                          </span>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        {row.entry?.currencyCode}$
-                        {row.entry?.totalValue.toNumber().toLocaleString()}
-                      </>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {row.entry?.updatedAt.toLocaleDateString()}
-                  </TableCell>
-                </>
-              ) : (
-                <>
-                  <TableCell colSpan={4}>
-                    <div className="text-center text-secondary-foreground">
-                      No data
-                    </div>
-                  </TableCell>
-                </>
-              )}
-            </TableRow>
-          ))}
-          <TableRow>
-            <TableCell className="font-bold">Net worth</TableCell>
-            <TableCell></TableCell>
-            <TableCell></TableCell>
-            <TableCell></TableCell>
-            <TableCell>
-              NZD$
-              {joined
-                .map((e) =>
-                  e.object.type === "ASSET"
-                    ? e.entry
-                      ? e.entry?.currencyCode === "NZD"
-                        ? e.entry.totalValue.toNumber()
-                        : e.entry?.totalValue.toNumber() *
-                          conversionFactors[e.entry?.currencyCode]
-                      : 0
-                    : (e.entry
-                        ? e.entry?.currencyCode === "NZD"
-                          ? e.entry.totalValue.toNumber()
-                          : e.entry?.totalValue.toNumber() *
-                            conversionFactors[e.entry?.currencyCode]
-                        : 0) * -1
-                )
-                .reduce((a, b) => a + b, 0)
-                .toLocaleString()}
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
+      <AssetTable
+        data={joined.map((row) => ({
+          id: row.object.id,
+          currencyCode: row.entry?.currencyCode,
+          lastEntryDate: row.entry?.createdAt,
+          name: row.object.name,
+          totalValue: row.entry?.totalValue.toString(),
+          totalValueBaseCurrency: row.entry
+            ? calculateBaseValue({
+                ...row,
+                entries: [row.entry!],
+              }).toString()
+            : "0",
+          type: row.object.type,
+          unitsHeld: row.entry?.unitCount.toString(),
+          unitValue: row.entry?.unitValue.toString(),
+          totalValueBaseCurrencySortable: row.entry
+            ? calculateBaseValue({
+                ...row,
+                entries: [row.entry!],
+              })
+            : 0,
+        }))}
+      />
       <div className="max-w-3xl">
         <AssetChart
           lines={objects.map((e) => ({ color: "green", key: e.name }))}

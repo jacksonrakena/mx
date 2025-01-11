@@ -20,7 +20,7 @@ import { conversionFactors } from "./assets/layout";
 import { Charts } from "./components/Charts";
 
 const prisma = new PrismaClient();
-const calculateBaseValue = (asset: {
+export const calculateBaseValue = (asset: {
   entries: { currencyCode: string; totalValue: Decimal }[];
 }) => {
   if (asset.entries.length === 0) return 0;
