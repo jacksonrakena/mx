@@ -19,9 +19,10 @@ export type ObjectWithLatestEntry = {
   entry: Prisma.EntryGetPayload<{}>;
 };
 
-const conversionFactors: { [x: string]: number } = {
+export const conversionFactors: { [x: string]: number } = {
   USD: 1.8,
   AUD: 1.11,
+  HKD: 0.23,
 };
 export default async function Assets({
   children,
