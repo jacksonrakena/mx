@@ -7,18 +7,22 @@ export const assetsRoute = {
     {
       title: "Securities",
       url: "securities",
+      items: [],
     },
     {
       title: "Property",
       url: "property",
+      items: [],
     },
     {
       title: "Cash and equivalents",
       url: "cash",
+      items: [],
     },
     {
       title: "Credits",
       url: "credits",
+      items: [],
     },
   ],
 };
@@ -29,14 +33,17 @@ export const liabilitiesRoute = {
     {
       title: "Loans & mortgage",
       url: "loans",
+      items: [],
     },
     {
       title: "Credit lines",
       url: "credit",
+      items: [],
     },
     {
       title: "Other debts",
       url: "other",
+      items: [],
     },
   ],
 };
