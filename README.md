@@ -12,6 +12,14 @@ Principled means the following:
 ### Architecture
 ![alt text](image-1.png)
 
+This project has a couple of accounting principles:
+- Change in net worth over time is measured by the real change in currency value with respect to a "base currency" (the user's home currency)
+  - This means that any user holding resources in a foreign currency will see their net worth change daily (even if their nominal resources do not change), as most currencies are floated
+- Net worth = `Assets + (Liabilities * -1)`
+- Depreciation is not currently considered.
+  - A user can record depreciation by recording a new resource value (`Entry`) with the depreciated value.
+- For the purposes of streamlining systems, resources (`Object`) are held by the user for life. The system will "hide" objects where the most recent entry records the unit count as being zero.
+
 ### Design goals
 * Automation - use open banking APIs, if possible
   * These are often hard to access. New Zealand's banking industry has made small steps towards a Europe-style model, but it's still limited, often broken, and expensive to access.
