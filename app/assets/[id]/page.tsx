@@ -16,6 +16,8 @@ export default async function AssetInfoPage({
       entries: true,
     },
   });
+  if (!asset) return <>Not found</>;
+  console.log(asset.entries[0].unitCount);
   return (
     <>
       <AssetInfo
@@ -24,9 +26,9 @@ export default async function AssetInfoPage({
             ...asset,
             entries: asset?.entries.map((e) => ({
               ...e,
-              unitCount: e.unitCount.toNumber(),
-              unitValue: e.unitValue.toNumber(),
-              totalValue: e.totalValue.toNumber(),
+              unitCount: e.unitCount.toString(),
+              unitValue: e.unitValue.toString(),
+              totalValue: e.totalValue.toString(),
               additionalData: {},
             })),
           } as any

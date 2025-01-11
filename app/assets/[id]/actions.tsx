@@ -1,6 +1,7 @@
 "use server";
 import { auth } from "@/auth";
 import { PrismaClient } from "@prisma/client";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 const prisma = new PrismaClient();
@@ -10,6 +11,21 @@ const createEntrySchema = z.object({
   unitValue: z.number().nonnegative(),
   currency: z.enum(["USD", "NZD", "AUD"]),
 });
+
+export async function deleteLedgerEntry(objectId: string, entryId: string) {
+  const session = await auth();
+  if (!session || !session.user?.email) return;
+  const entry = await prisma.entry.delete({
+    where: {
+      id: entryId,
+      AND: { object: { owner: session.user.email } },
+    },
+  });
+  if (!entry) return { error: "unauthorised" };
+
+  revalidatePath(`/assets/${objectId}`);
+  return { status: "ok" };
+}
 
 export async function test(assetId: string, formData: any) {
   const session = await auth();
