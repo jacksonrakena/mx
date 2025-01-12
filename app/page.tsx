@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/table";
 import { Currency, PrismaClient } from "@prisma/client";
 import { Decimal } from "@prisma/client/runtime/library";
-import { conversionFactors } from "./assets/layout";
+import { conversionFactors } from "./assets/page";
 import { Charts } from "./components/Charts";
 import { authenticate } from "./users";
 

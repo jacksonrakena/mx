@@ -9,13 +9,6 @@ import {
 } from "@/components/custom/CustomTable";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -35,7 +28,7 @@ import { Decimal } from "decimal.js";
 import { MoreHorizontal } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
-import { conversionFactors } from "../../layout";
+import { conversionFactors } from "../../page";
 import { deleteLedgerEntry } from "../actions";
 import { CreateEntry } from "./CreateEntry";
 
@@ -192,26 +185,14 @@ export const AssetInfo = ({
   });
   return (
     <>
-      <Dialog
-        open={true}
-        onOpenChange={() => {
-          router.push(`/assets`);
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{asset?.name}</DialogTitle>
-            <DialogDescription asChild>
-              <CustomTable table={table} columns={columns}>
-                {table.getRowCount() !== 0 && (
-                  <DataTablePagination table={table} />
-                )}
-              </CustomTable>
-            </DialogDescription>
-            <CreateEntry assetId={asset.id} />
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
+      <div className="text-2xl font-bold">{asset?.name}</div>
+      <div>
+        <div className="text-xl font-semibold mb-2">Asset history</div>
+        <CustomTable table={table} columns={columns}>
+          {table.getRowCount() !== 0 && <DataTablePagination table={table} />}
+        </CustomTable>
+        <CreateEntry assetId={asset.id} />
+      </div>
     </>
   );
 };

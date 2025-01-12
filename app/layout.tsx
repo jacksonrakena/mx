@@ -1,6 +1,4 @@
 import { AppSidebar } from "@/components/app-sidebar";
-import { ClientBreadcrumbs } from "@/components/client-breadcrumbs";
-import { routeTable } from "@/components/data";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
@@ -31,8 +29,10 @@ const geistMono = localFont({
 
 export default async function Page({
   children,
+  breadcrumb,
 }: Readonly<{
   children: React.ReactNode;
+  breadcrumb: React.ReactNode;
 }>) {
   const session = await authenticate();
   if (!session.user) return <></>;
@@ -51,7 +51,8 @@ export default async function Page({
                   <div className="flex items-center gap-2 px-4">
                     <SidebarTrigger className="-ml-1" />
                     <Separator orientation="vertical" className="mr-2 h-4" />
-                    <ClientBreadcrumbs routeTable={routeTable} />
+                    {breadcrumb}
+                    {/* <ClientBreadcrumbs routeTable={routeTable} /> */}
                   </div>
                 </header>
                 <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
