@@ -20,19 +20,27 @@ import { Charts } from "./components/Charts";
 import { authenticate } from "./users";
 
 const prisma = new PrismaClient();
+export const calculateEntryBaseValue = (
+  currencyCode: Currency,
+  totalValue: Decimal,
+  homeCurrency: Currency
+) => {
+  return currencyCode === homeCurrency
+    ? totalValue.toNumber()
+    : totalValue.toNumber() * conversionFactors[currencyCode][homeCurrency];
+};
 export const calculateBaseValue = (
   asset: {
-    entries: { currencyCode: string; totalValue: Decimal }[];
+    entries: { currencyCode: Currency; totalValue: Decimal }[];
   },
   homeCurrency: Currency
 ) => {
   if (asset.entries.length === 0) return 0;
-  return asset.entries[0].currencyCode === homeCurrency
-    ? asset.entries[0].totalValue.toNumber()
-    : asset.entries[0].totalValue.toNumber() *
-        conversionFactors[asset.entries[0].currencyCode as Currency][
-          homeCurrency as Currency
-        ];
+  return calculateEntryBaseValue(
+    asset.entries[0].currencyCode,
+    asset.entries[0].totalValue,
+    homeCurrency
+  );
 };
 const MulticurrencyValue = ({
   asset,

@@ -2,6 +2,7 @@
 
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
+import { useAppSession } from "@/app/providers/AppSessionProvider";
 import {
   ChartConfig,
   ChartContainer,
@@ -11,6 +12,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { CircleDollarSign, Landmark } from "lucide-react";
+import { useMemo } from "react";
 
 const chartData = [
   { month: "January", desktop: 186, mobile: 80 },
@@ -44,6 +46,20 @@ export const AssetChart = ({
     key: string;
   }[];
 }) => {
+  const appSession = useAppSession();
+  if (!appSession.user) return <></>;
+  const currencyFormatter = useMemo(
+    () => appSession.currencyFormatFactory(appSession.user.homeCurrency),
+    [appSession, appSession.user]
+  );
+  const dateFormatter = new Intl.DateTimeFormat([], {
+    month: "long",
+    year: "numeric",
+  });
+  const monthTickFormatter = new Intl.DateTimeFormat([], {
+    month: "short",
+    year: "2-digit",
+  });
   return (
     <ChartContainer
       config={Object.fromEntries(
@@ -58,15 +74,39 @@ export const AssetChart = ({
     >
       <LineChart accessibilityLayer data={data}>
         <CartesianGrid vertical={false} />
-        <XAxis dataKey="name" />
+        <XAxis
+          dataKey="name"
+          tickFormatter={(value) => monthTickFormatter.format(new Date(value))}
+        />
         <YAxis />
         <ChartLegend content={<ChartLegendContent />} />
 
-        <ChartTooltip content={<ChartTooltipContent />} />
+        <ChartTooltip
+          content={
+            <ChartTooltipContent
+              labelFormatter={(label) => {
+                return <>{dateFormatter.format(new Date(label))}</>;
+              }}
+              formatter={(value, name) => (
+                <div className="w-full flex justify-between text-xs text-muted-foreground">
+                  <div className="max-w-52">
+                    {chartConfig[name as keyof typeof chartConfig]?.label ||
+                      name}
+                  </div>
+                  <div className="font-mono font-medium tabular-nums text-foreground">
+                    ${currencyFormatter.format(value as number)}
+                  </div>
+                </div>
+              )}
+            />
+          }
+        />
 
         {lines.map((line) => (
           <Line
+            connectNulls
             key={line.key}
+            strokeWidth={2}
             type="monotone"
             stroke={line.color}
             dataKey={line.key}

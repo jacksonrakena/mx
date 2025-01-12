@@ -115,6 +115,4 @@ export const CreateAsset = () => {
       </form>
     </Form>
   );
-
-  return <></>;
 };
