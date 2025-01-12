@@ -18,7 +18,5 @@ CREATE TABLE "app_user" (
     CONSTRAINT "app_user_pkey" PRIMARY KEY ("id")
 );
 
-INSERT INTO "app_user" VALUES ('jackson@rakena.com.au', 'NZD');
-
 -- AddForeignKey
 ALTER TABLE "user_object" ADD CONSTRAINT "user_object_owner_fkey" FOREIGN KEY ("owner") REFERENCES "app_user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
