@@ -207,7 +207,6 @@ export const AssetTable = ({ data }: { data: EntryRow[] }) => {
     },
   });
 
-  console.log("debug: AssetTable render " + Date.now());
   return (
     <>
       <CustomTable table={table} columns={columns}>
