@@ -16,7 +16,7 @@ export async function deleteAsset(assetId: string) {
   const entry = await prisma.object.delete({
     where: {
       id: assetId,
-      AND: { owner: session.user.email },
+      AND: { ownerId: session.user.email },
     },
   });
   if (!entry) return { error: "unauthorised" };
@@ -41,7 +41,7 @@ export async function createAsset(formData: FormData) {
   await prisma.object.create({
     data: {
       name: data.name,
-      owner: session.user.email,
+      ownerId: session.user.email,
       type: data.type,
       unitCountProvider: "manual_entry",
       unitValueProvider: "manual_entry",

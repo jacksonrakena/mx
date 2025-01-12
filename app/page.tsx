@@ -1,4 +1,3 @@
-import { auth } from "@/auth";
 import {
   Card,
   CardContent,
@@ -14,38 +13,46 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { PrismaClient } from "@prisma/client";
+import { Currency, PrismaClient } from "@prisma/client";
 import { Decimal } from "@prisma/client/runtime/library";
 import { conversionFactors } from "./assets/layout";
 import { Charts } from "./components/Charts";
+import { authenticate } from "./users";
 
 const prisma = new PrismaClient();
-export const calculateBaseValue = (asset: {
-  entries: { currencyCode: string; totalValue: Decimal }[];
-}) => {
+export const calculateBaseValue = (
+  asset: {
+    entries: { currencyCode: string; totalValue: Decimal }[];
+  },
+  homeCurrency: Currency
+) => {
   if (asset.entries.length === 0) return 0;
-  return asset.entries[0].currencyCode === "NZD"
+  return asset.entries[0].currencyCode === homeCurrency
     ? asset.entries[0].totalValue.toNumber()
     : asset.entries[0].totalValue.toNumber() *
-        conversionFactors[asset.entries[0].currencyCode];
+        conversionFactors[asset.entries[0].currencyCode as Currency][
+          homeCurrency as Currency
+        ];
 };
 const MulticurrencyValue = ({
   asset,
+  homeCurrency,
 }: {
   asset: {
     entries: { currencyCode: string; totalValue: Decimal }[];
   };
+  homeCurrency: Currency;
 }) => {
   return (
     <div className="flex flex-col">
       <div>
-        NZD$
-        {calculateBaseValue(asset).toLocaleString([], {
+        {homeCurrency}$
+        {calculateBaseValue(asset, homeCurrency).toLocaleString([], {
           maximumFractionDigits: 2,
         })}
       </div>
       {asset.entries.length !== 0 &&
-        asset.entries[0].currencyCode !== "NZD" && (
+        asset.entries[0].currencyCode !== homeCurrency && (
           <div className="text-xs text-gray-500">
             {asset.entries[0].currencyCode}$
             {asset.entries[0].totalValue
@@ -57,12 +64,12 @@ const MulticurrencyValue = ({
   );
 };
 export default async function Overview() {
-  const session = await auth();
-  if (!session?.user?.email) return <>Login</>;
+  const session = await authenticate();
+  if (!session.user) return <></>;
 
   const joined = await prisma.object.findMany({
     where: {
-      owner: session?.user?.email,
+      ownerId: session.user.id,
     },
     include: {
       entries: {
@@ -78,16 +85,20 @@ export default async function Overview() {
       a +
       (b.type === "ASSET"
         ? b.entries[0]
-          ? b.entries[0].currencyCode === "NZD"
+          ? b.entries[0].currencyCode === session.user.homeCurrency
             ? b.entries[0].totalValue.toNumber()
             : b.entries[0].totalValue.toNumber() *
-              conversionFactors[b.entries[0].currencyCode]
+              conversionFactors[b.entries[0].currencyCode][
+                session.user.homeCurrency
+              ]
           : 0
         : (b.entries[0]
-            ? b.entries[0].currencyCode === "NZD"
+            ? b.entries[0].currencyCode === session.user.homeCurrency
               ? b.entries[0].totalValue.toNumber()
               : b.entries[0].totalValue.toNumber() *
-                conversionFactors[b.entries[0].currencyCode]
+                conversionFactors[b.entries[0].currencyCode][
+                  session.user.homeCurrency
+                ]
             : 0) * -1)
     );
   }, 0);
@@ -97,10 +108,12 @@ export default async function Overview() {
     return (
       a +
       (b.entries[0]
-        ? b.entries[0].currencyCode === "NZD"
+        ? b.entries[0].currencyCode === session.user.homeCurrency
           ? b.entries[0].totalValue.toNumber()
           : b.entries[0].totalValue.toNumber() *
-            conversionFactors[b.entries[0].currencyCode]
+            conversionFactors[b.entries[0].currencyCode][
+              session.user.homeCurrency
+            ]
         : 0)
     );
   }, 0);
@@ -110,10 +123,12 @@ export default async function Overview() {
     return (
       a +
       (b.entries[0]
-        ? b.entries[0].currencyCode === "NZD"
+        ? b.entries[0].currencyCode === session.user.homeCurrency
           ? b.entries[0].totalValue.toNumber()
           : b.entries[0].totalValue.toNumber() *
-            conversionFactors[b.entries[0].currencyCode]
+            conversionFactors[b.entries[0].currencyCode][
+              session.user.homeCurrency
+            ]
         : 0) *
         -1
     );
@@ -125,7 +140,8 @@ export default async function Overview() {
           <div className="flex flex-col gap-2 mt-6">
             <div className="text-lg">Welcome back, Jackson</div>
             <div className="text-xl font-bold">
-              NZD${netWorth.toLocaleString([], { maximumFractionDigits: 2 })}
+              {session.user.homeCurrency}$
+              {netWorth.toLocaleString([], { maximumFractionDigits: 2 })}
             </div>
             <div className="text-sm">
               Net worth &bull; {assets.length} assets &bull;{" "}
@@ -143,7 +159,7 @@ export default async function Overview() {
             <div className="flex flex-col">
               <div>
                 <div className="text-2xl font-extrabold">
-                  NZD$
+                  {session.user.homeCurrency}$
                   {assetWorth.toLocaleString([], { maximumFractionDigits: 2 })}
                 </div>
                 <div className="text-gray-600 text-sm">
@@ -164,14 +180,18 @@ export default async function Overview() {
                         {assets
                           .toSorted(
                             (b, a) =>
-                              calculateBaseValue(a) - calculateBaseValue(b)
+                              calculateBaseValue(a, session.user.homeCurrency) -
+                              calculateBaseValue(b, session.user.homeCurrency)
                           )
                           .slice(0, 5)
                           .map((a) => (
                             <TableRow key={a.id}>
                               <TableCell>{a.name}</TableCell>
                               <TableCell>
-                                <MulticurrencyValue asset={a} />
+                                <MulticurrencyValue
+                                  asset={a}
+                                  homeCurrency={session.user.homeCurrency}
+                                />
                               </TableCell>
                             </TableRow>
                           ))}
@@ -191,7 +211,7 @@ export default async function Overview() {
             <div className="flex flex-col">
               <div>
                 <div className="text-2xl font-extrabold">
-                  NZD$
+                  {session.user.homeCurrency}$
                   {(liaWorth * -1).toLocaleString([], {
                     maximumFractionDigits: 2,
                   })}
@@ -214,14 +234,18 @@ export default async function Overview() {
                         {liabilities
                           .toSorted(
                             (b, a) =>
-                              calculateBaseValue(a) - calculateBaseValue(b)
+                              calculateBaseValue(a, session.user.homeCurrency) -
+                              calculateBaseValue(b, session.user.homeCurrency)
                           )
                           .slice(0, 5)
                           .map((a) => (
                             <TableRow>
                               <TableCell>{a.name}</TableCell>
                               <TableCell>
-                                <MulticurrencyValue asset={a} />
+                                <MulticurrencyValue
+                                  asset={a}
+                                  homeCurrency={session.user.homeCurrency}
+                                />
                               </TableCell>
                             </TableRow>
                           ))}

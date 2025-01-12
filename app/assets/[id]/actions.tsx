@@ -18,7 +18,7 @@ export async function deleteLedgerEntry(objectId: string, entryId: string) {
   const entry = await prisma.entry.delete({
     where: {
       id: entryId,
-      AND: { object: { owner: session.user.email } },
+      AND: { object: { ownerId: session.user.email } },
     },
   });
   if (!entry) return { error: "unauthorised" };
@@ -43,7 +43,7 @@ export async function createLedgerEntry(assetId: string, formData: any) {
           id: assetId,
         },
         {
-          owner: session.user.email,
+          ownerId: session.user.email,
         },
       ],
     },

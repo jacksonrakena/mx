@@ -2,6 +2,8 @@
 
 import * as React from "react";
 
+import { updateHomeCurrency } from "@/app/actions";
+import { useAppSession } from "@/app/providers/AppSessionProvider";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 import { TeamSwitcher } from "@/components/team-switcher";
@@ -12,6 +14,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { Currency } from "@prisma/client";
 import {
   AudioWaveform,
   BookOpen,
@@ -25,6 +28,13 @@ import {
   Settings2,
 } from "lucide-react";
 import { routeTable } from "./data";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 
 // This is sample data.
 
@@ -166,6 +176,7 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const session = useAppSession();
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -173,6 +184,25 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={routeTable} />
+        <div className="mx-4">
+          <Select
+            value={session.user?.homeCurrency}
+            onValueChange={(e) => {
+              (async () => {
+                await updateHomeCurrency(e as Currency);
+              })();
+            }}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Theme" />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.values(Currency).map((currency) => (
+                <SelectItem value={currency}>{currency}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </SidebarContent>
       <SidebarFooter>
         <TeamSwitcher teams={data.teams} />

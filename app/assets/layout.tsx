@@ -1,6 +1,6 @@
-import { auth } from "@/auth";
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Currency, Prisma, PrismaClient } from "@prisma/client";
 import { calculateBaseValue } from "../page";
+import { authenticate } from "../users";
 import { AssetChart } from "./_components/AssetChart";
 import { AssetTable } from "./_components/AssetTable";
 import { CreateAsset } from "./_components/CreateAsset";
@@ -12,18 +12,47 @@ export type ObjectWithLatestEntry = {
   entry: Prisma.EntryGetPayload<{}>;
 };
 
-export const conversionFactors: { [x: string]: number } = {
-  USD: 1.8,
-  AUD: 1.11,
-  HKD: 0.23,
+type ConversionsTo<HomeCurrency extends string> = Record<HomeCurrency, 1> & {
+  [key in Currency]: number;
+};
+type ConversionFactorTable = {
+  [key in Currency]: ConversionsTo<key>;
+};
+export const conversionFactors: ConversionFactorTable = {
+  NZD: {
+    AUD: 0.9,
+    USD: 0.56,
+    HKD: 4.35,
+    NZD: 1.0,
+  },
+  USD: {
+    NZD: 1.8,
+    HKD: 7.79,
+    AUD: 1.63,
+    USD: 1.0,
+  },
+  AUD: {
+    NZD: 1.11,
+    HKD: 4.79,
+    USD: 0.61,
+    AUD: 1.0,
+  },
+  HKD: {
+    USD: 0.13,
+    NZD: 0.23,
+    AUD: 0.21,
+    HKD: 1.0,
+  },
 };
 export default async function Assets({
   children,
 }: React.PropsWithChildren<{}>) {
-  const session = await auth();
+  const session = await authenticate();
+  if (!session.user) return <></>;
+
   const objects = await prisma.object.findMany({
     where: {
-      owner: session?.user?.email ?? "",
+      ownerId: session.user.id ?? "",
     },
   });
   const entries = await prisma.entry.findMany({
@@ -42,7 +71,7 @@ export default async function Assets({
   const allEntries = await prisma.entry.findMany({
     where: {
       object: {
-        owner: session?.user?.email ?? "",
+        ownerId: session.user.id ?? "",
       },
     },
     include: { object: { select: { name: true } } },
@@ -77,19 +106,25 @@ export default async function Assets({
           name: row.object.name,
           totalValue: row.entry?.totalValue.toString(),
           totalValueBaseCurrency: row.entry
-            ? calculateBaseValue({
-                ...row,
-                entries: [row.entry!],
-              }).toString()
+            ? calculateBaseValue(
+                {
+                  ...row,
+                  entries: [row.entry!],
+                },
+                session.user.homeCurrency
+              ).toString()
             : "0",
           type: row.object.type,
           unitsHeld: row.entry?.unitCount.toString(),
           unitValue: row.entry?.unitValue.toString(),
           totalValueBaseCurrencySortable: row.entry
-            ? calculateBaseValue({
-                ...row,
-                entries: [row.entry!],
-              })
+            ? calculateBaseValue(
+                {
+                  ...row,
+                  entries: [row.entry!],
+                },
+                session.user.homeCurrency
+              )
             : 0,
         }))}
       />

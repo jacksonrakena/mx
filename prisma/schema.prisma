@@ -13,6 +13,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id           String   @id
+  objects      Object[]
+  homeCurrency Currency @map("home_currency")
+
+  @@map("app_user")
+}
+
 enum Type {
   ASSET
   LIABILITY
@@ -20,9 +28,19 @@ enum Type {
   @@map("object_type")
 }
 
+enum Currency {
+  NZD
+  AUD
+  USD
+  HKD
+
+  @@map("currency")
+}
+
 model Object {
   id        String   @id @default(cuid())
-  owner     String
+  ownerId   String   @map("owner")
+  owner     User     @relation(fields: [ownerId], references: [id])
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   name      String
@@ -50,7 +68,7 @@ model Entry {
   totalValue       Decimal @map("total_value")
   totalValueSource String  @map("total_value_source")
 
-  currencyCode String @map("currency_code")
+  currencyCode Currency @map("currency_code")
 
   additionalData Json? @map("additional_data")
 
