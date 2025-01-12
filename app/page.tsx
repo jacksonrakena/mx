@@ -47,7 +47,7 @@ const MulticurrencyValue = ({
   homeCurrency,
 }: {
   asset: {
-    entries: { currencyCode: string; totalValue: Decimal }[];
+    entries: { currencyCode: Currency; totalValue: Decimal }[];
   };
   homeCurrency: Currency;
 }) => {
@@ -158,7 +158,7 @@ export default async function Overview() {
           </div>
         </CardContent>
       </Card>
-      <div className="flex gap-6">
+      <div className="flex gap-6 flex-wrap lg:flex-nowrap">
         <Card className="flex-grow">
           <CardHeader>
             <CardTitle>Total assets</CardTitle>
@@ -194,7 +194,9 @@ export default async function Overview() {
                           .slice(0, 5)
                           .map((a) => (
                             <TableRow key={a.id}>
-                              <TableCell>{a.name}</TableCell>
+                              <TableCell className="text-wrap">
+                                {a.name}
+                              </TableCell>
                               <TableCell>
                                 <MulticurrencyValue
                                   asset={a}
