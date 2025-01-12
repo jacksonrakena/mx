@@ -43,7 +43,9 @@ export default async function Page({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <SidebarProvider>
-          <AppSessionProvider value={session}>
+          <AppSessionProvider
+            value={session}
+          >
             <SessionProvider>
               <AppSidebar />
               <SidebarInset>

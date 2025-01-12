@@ -118,7 +118,9 @@ export const CreateEntry = ({ assetId }: { assetId: string }) => {
                     </SelectTrigger>
                     <SelectContent>
                       {["NZD", "AUD", "USD"].map((currency) => (
-                        <SelectItem value={currency}>{currency}</SelectItem>
+                        <SelectItem key={currency} value={currency}>
+                          {currency}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

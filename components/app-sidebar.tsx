@@ -198,7 +198,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SelectTrigger>
             <SelectContent>
               {Object.values(Currency).map((currency) => (
-                <SelectItem value={currency}>{currency}</SelectItem>
+                <SelectItem key={currency} value={currency}>
+                  {currency}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>

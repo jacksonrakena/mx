@@ -25,7 +25,7 @@ import {
 import { Decimal } from "decimal.js";
 import { MoreHorizontal } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { deleteAsset } from "../actions";
 
 type EntryRow = {
@@ -74,10 +74,14 @@ const createColumns = (
       header: "Unit value",
       cell: ({ row }) => {
         if (!row.original.unitValue || !row.original.currencyCode) return "";
-        return new Intl.NumberFormat([], {
-          style: "currency",
-          currency: row.original.currencyCode as any,
-        }).format(new Decimal(row.original.unitValue).toNumber());
+        return (
+          <div suppressHydrationWarning>
+            {new Intl.NumberFormat([], {
+              style: "currency",
+              currency: row.original.currencyCode as any,
+            }).format(new Decimal(row.original.unitValue).toNumber())}
+          </div>
+        );
       },
     },
     {
@@ -111,8 +115,13 @@ const createColumns = (
             {currencyCode !== homeCurrency ? (
               <>
                 <div className="flex flex-col">
-                  <span>{baseValue}</span>
-                  <span className="text-xs text-gray-500">{formatted}</span>
+                  <span suppressHydrationWarning>{baseValue}</span>
+                  <span
+                    suppressHydrationWarning
+                    className="text-xs text-gray-500"
+                  >
+                    {formatted}
+                  </span>
                 </div>
               </>
             ) : (
@@ -127,7 +136,9 @@ const createColumns = (
       header: "Last valued",
       cell: ({ row }) => {
         const value = row.getValue<Date>("lastEntryDate");
-        return value?.toLocaleDateString();
+        return (
+          <span suppressHydrationWarning>{value?.toLocaleDateString([])}</span>
+        );
       },
     },
     {
@@ -174,20 +185,29 @@ export const AssetTable = ({ data }: { data: EntryRow[] }) => {
   const appSession = useAppSession();
   if (!appSession.user) return <></>;
   const columns = useMemo(() => createColumns(appSession), [appSession]);
+  const tableData = useMemo(
+    () =>
+      data.toSorted((a, b) =>
+        new Decimal(b.totalValueBaseCurrency ?? 0)
+          .sub(a.totalValueBaseCurrency ?? 0)
+          .toNumber()
+      ),
+    [data]
+  );
   const table = useReactTable({
     columns: columns,
-    data: data.toSorted((a, b) =>
-      new Decimal(b.totalValueBaseCurrency ?? 0)
-        .sub(a.totalValueBaseCurrency ?? 0)
-        .toNumber()
-    ),
+    data: tableData,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: {
+        pageSize: 5,
+        pageIndex: 0,
+      },
+    },
   });
 
-  useEffect(() => {
-    table.setPageSize(5);
-  }, []);
+  console.log("debug: AssetTable render " + Date.now());
   return (
     <>
       <CustomTable table={table} columns={columns}>

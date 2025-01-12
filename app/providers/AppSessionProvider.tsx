@@ -14,9 +14,23 @@ export type UnauthenticatedAppSession = {
   user: null;
 };
 export type AppSession = AuthenticatedAppSession | UnauthenticatedAppSession;
-const AppSessionContext = createContext<AppSession>({
+export type AppIntlSettings = {
+  numberFormat: Intl.NumberFormat;
+  currencyFormatFactory: (currency: string) => Intl.NumberFormat;
+  dateFormat: Intl.DateTimeFormat;
+};
+export type ClientAppSession = AppSession & {
+  numberFormat: Intl.NumberFormat;
+  currencyFormatFactory: (currency: string) => Intl.NumberFormat;
+  dateFormat: Intl.DateTimeFormat;
+};
+const AppSessionContext = createContext<ClientAppSession>({
   state: "unauthenticated",
   user: null,
+  numberFormat: new Intl.NumberFormat(),
+  currencyFormatFactory: (currency) =>
+    new Intl.NumberFormat([], { currency: currency }),
+  dateFormat: new Intl.DateTimeFormat([]),
 });
 
 const useAppSession = () => {
@@ -29,9 +43,19 @@ const useAppSession = () => {
 const AppSessionProvider = ({
   children,
   value,
-}: React.PropsWithChildren<{ value: AppSession }>) => {
+}: React.PropsWithChildren<{
+  value: AppSession;
+}>) => {
   return (
-    <AppSessionContext.Provider value={value}>
+    <AppSessionContext.Provider
+      value={{
+        ...value,
+        dateFormat: new Intl.DateTimeFormat(),
+        numberFormat: new Intl.NumberFormat(),
+        currencyFormatFactory: (currency) =>
+          new Intl.NumberFormat([], { currency: currency }),
+      }}
+    >
       {children}
     </AppSessionContext.Provider>
   );

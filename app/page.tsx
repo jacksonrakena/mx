@@ -239,7 +239,7 @@ export default async function Overview() {
                           )
                           .slice(0, 5)
                           .map((a) => (
-                            <TableRow>
+                            <TableRow key={a.id}>
                               <TableCell>{a.name}</TableCell>
                               <TableCell>
                                 <MulticurrencyValue

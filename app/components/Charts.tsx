@@ -62,7 +62,7 @@ const data = [
     liabilities: 22000,
   },
 ];
-export const Charts = async () => {
+export const Charts = () => {
   return (
     <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
       <LineChart accessibilityLayer data={data}>
