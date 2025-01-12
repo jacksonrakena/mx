@@ -201,7 +201,7 @@ export const AssetInfo = ({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{asset?.name}</DialogTitle>
-            <DialogDescription>
+            <DialogDescription asChild>
               <CustomTable table={table} columns={columns}>
                 {table.getRowCount() !== 0 && (
                   <DataTablePagination table={table} />

@@ -1,6 +1,30 @@
+import { authenticate } from "@/app/users";
 import { PrismaClient } from "@prisma/client";
+import { Metadata, ResolvingMetadata } from "next";
 import { AssetInfo } from "./_components/AssetInfo";
 const prisma = new PrismaClient();
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ id: string }> },
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const id = (await params).id;
+  const auth = await authenticate();
+  if (!auth.user) return {};
+  const asset = await prisma.object.findFirst({
+    where: {
+      id: id,
+      ownerId: auth.user.id,
+    },
+    include: {
+      entries: true,
+    },
+  });
+  if (!asset) return {};
+  return {
+    title: asset.name,
+  };
+}
 
 export default async function AssetInfoPage({
   params,
@@ -8,9 +32,12 @@ export default async function AssetInfoPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const auth = await authenticate();
+  if (!auth.user) return <></>;
   const asset = await prisma.object.findFirst({
     where: {
       id: id,
+      ownerId: auth.user.id,
     },
     include: {
       entries: true,
