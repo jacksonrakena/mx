@@ -76,7 +76,11 @@ export const AssetChart = ({
         <CartesianGrid vertical={false} />
         <XAxis
           dataKey="name"
-          tickFormatter={(value) => monthTickFormatter.format(new Date(value))}
+          tickFormatter={(value) => {
+            console.log(value);
+            console.log(new Date(value));
+            return monthTickFormatter.format(new Date(value));
+          }}
         />
         <YAxis />
         <ChartLegend content={<ChartLegendContent />} />

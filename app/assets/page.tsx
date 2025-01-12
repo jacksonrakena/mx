@@ -1,5 +1,5 @@
 import { Currency, Prisma, PrismaClient } from "@prisma/client";
-import { add, isBefore } from "date-fns";
+import { add, format, isBefore } from "date-fns";
 import { calculateBaseValue, calculateEntryBaseValue } from "../page";
 import { authenticate } from "../users";
 import { AssetChart } from "./_components/AssetChart";
@@ -89,15 +89,10 @@ export default async function Assets() {
       currentDate = add(currentDate, { months: 1 });
     }
     const monthBins = Object.fromEntries(
-      monthRanges.map((e) => [
-        `${e.getFullYear()}-${e.getMonth() + 1}`,
-        [] as any[],
-      ])
+      monthRanges.map((e) => [format(e, "yyyy-MM"), [] as any[]])
     );
     for (const entry of allEntries) {
-      const month = entry.createdAt.getMonth() + 1;
-      const year = entry.createdAt.getFullYear();
-      const bin = `${year}-${month}`;
+      const bin = format(entry.createdAt, "yyyy-MM");
       monthBins[bin] = [...(monthBins[bin] ?? []), entry];
     }
     data = Object.entries(monthBins)
