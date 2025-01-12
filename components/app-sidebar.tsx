@@ -6,27 +6,16 @@ import { updateHomeCurrency } from "@/app/actions";
 import { useAppSession } from "@/app/providers/AppSessionProvider";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
-import { TeamSwitcher } from "@/components/team-switcher";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarMenu,
+  SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { Currency } from "@prisma/client";
-import {
-  AudioWaveform,
-  BookOpen,
-  CircleDollarSign,
-  Command,
-  Frame,
-  GalleryVerticalEnd,
-  Landmark,
-  Map,
-  PieChart,
-  Settings2,
-} from "lucide-react";
 import { routeTable } from "./data";
 import {
   Select,
@@ -35,145 +24,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-
-// This is sample data.
-
-const data = {
-  user: {
-    name: "Jackson Rakena",
-    email: "jackson@rakena.com.au",
-    avatar: "https://avatars.githubusercontent.com/u/44521335?v=4",
-  },
-  teams: [
-    {
-      name: "Rakena Whanau Trust",
-      logo: GalleryVerticalEnd,
-      plan: "Family trust",
-      location: "New Zealand",
-    },
-    {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-      location: "",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
-      location: "",
-    },
-  ],
-  navMain: [
-    {
-      title: "Assets",
-      url: "assets",
-      icon: Landmark,
-      isActive: true,
-      items: [
-        {
-          title: "Securities",
-          url: "securities",
-        },
-        {
-          title: "Property",
-          url: "property",
-        },
-        {
-          title: "Cash and equivalents",
-          url: "cash",
-        },
-        {
-          title: "Credits",
-          url: "credits",
-        },
-      ],
-    },
-    {
-      title: "Liabilities",
-      url: "liabilities",
-      icon: CircleDollarSign,
-      isActive: true,
-      items: [
-        {
-          title: "Loans & mortgage",
-          url: "loans",
-        },
-        {
-          title: "Credit lines",
-          url: "credit",
-        },
-        {
-          title: "Other debts",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ],
-};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const session = useAppSession();
@@ -207,7 +57,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </div>
       </SidebarContent>
       <SidebarFooter>
-        <TeamSwitcher teams={data.teams} />
+        <SidebarMenu>
+          <SidebarMenuItem className="m-2 flex gap-2 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
+            <div className="grid flex-1 text-left text-sm leading-tight">
+              <span className="truncate font-semibold">mxbudget</span>
+              <span>
+                <span className="truncate text-xs">Internal</span>
+              </span>
+            </div>
+            {/*  */}
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

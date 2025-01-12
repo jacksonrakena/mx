@@ -43,10 +43,7 @@ export function NavUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage
-                  src={session.data.user.name ?? ""}
-                  alt={session.data.user.name ?? ""}
-                />
+                <AvatarImage src={""} alt={session.data.user.name ?? ""} />
                 <AvatarFallback className="rounded-lg">
                   {(session.data.user.name ?? "").split(" ").map((e) => e[0])}
                 </AvatarFallback>
