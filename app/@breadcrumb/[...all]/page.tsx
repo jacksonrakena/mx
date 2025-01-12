@@ -10,17 +10,18 @@ import Link from "next/link";
 import type { ReactElement } from "react";
 import React from "react";
 
-export default function BreadcrumbSlot({
+export default async function BreadcrumbSlot({
   params,
 }: {
-  params: { all: string[] };
+  params: Promise<{ all: string[] }>;
 }) {
+  const { all } = await params;
   const breadcrumbItems: ReactElement[] = [];
   let breadcrumbPage: ReactElement = <></>;
-  for (let i = 0; i < params.all.length; i++) {
-    const route = params.all[i];
-    const href = `/${params.all.at(0)}/${route}`;
-    if (i === params.all.length - 1) {
+  for (let i = 0; i < all.length; i++) {
+    const route = all[i];
+    const href = `/${all.at(0)}/${route}`;
+    if (i === all.length - 1) {
       breadcrumbPage = (
         <BreadcrumbItem>
           <BreadcrumbPage className="capitalize">{route}</BreadcrumbPage>
