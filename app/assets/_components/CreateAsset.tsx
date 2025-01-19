@@ -19,7 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Loader2 } from "lucide-react";
 import { useRef } from "react";
+import { useFormStatus } from "react-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { createAsset } from "../actions";
@@ -40,13 +42,14 @@ export const CreateAsset = () => {
   });
 
   const formRef = useRef<HTMLFormElement>(null);
+  const { pending } = useFormStatus();
 
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(() => formRef.current?.submit())}
         ref={formRef}
-        action={createAsset as any}
+        action={createAsset}
         className="space-y-8"
       >
         <FormField
@@ -111,7 +114,10 @@ export const CreateAsset = () => {
             </FormItem>
           )}
         />
-        <Button type="submit">Submit</Button>
+        <Button type="submit" disabled={pending}>
+          {pending && <Loader2 className="animate-spin" />}
+          Submit
+        </Button>
       </form>
     </Form>
   );
