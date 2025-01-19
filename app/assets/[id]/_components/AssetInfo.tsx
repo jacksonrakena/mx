@@ -26,7 +26,6 @@ import {
 } from "@tanstack/react-table";
 import { Decimal } from "decimal.js";
 import { MoreHorizontal } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { conversionFactors } from "../../page";
 import { deleteLedgerEntry } from "../actions";
@@ -40,7 +39,7 @@ export type EntryRow = {
   unitValue: Decimal;
   totalValue: Decimal;
   totalValueBaseCurrency: Decimal;
-  currencyCode: String;
+  currencyCode: string;
 };
 
 export const createColumns = (
@@ -150,36 +149,39 @@ export const AssetInfo = ({
 }: {
   asset: Prisma.ObjectGetPayload<{ include: { entries: true } }>;
 }) => {
-  const router = useRouter();
-  const appSession = useAppSession();
-  if (!appSession.user) return <></>;
+  const appSession = useAppSession() as AuthenticatedAppSession;
   const columns = useMemo(() => createColumns(appSession), [appSession]);
+  const entries = useMemo(
+    () =>
+      asset.entries.map(
+        (entry) =>
+          ({
+            currencyCode: entry.currencyCode,
+            dateHeld: entry.createdAt,
+            id: entry.id,
+            objectId: entry.objectId,
+            totalValue: new Decimal(entry.totalValue),
+            totalValueBaseCurrency:
+              entry.currencyCode === appSession.user.homeCurrency
+                ? new Decimal(0)
+                : new Decimal(entry.totalValue).mul(
+                    conversionFactors[entry.currencyCode][
+                      appSession.user.homeCurrency
+                    ]
+                  ),
+            unitsHeld: new Decimal(entry.unitCount),
+            unitValue: new Decimal(entry.unitValue),
+          } as EntryRow)
+      ),
+    [asset.entries, appSession.user.homeCurrency]
+  );
   const table = useReactTable({
     columns: columns,
     getSortedRowModel: getSortedRowModel(),
-    state: {
+    initialState: {
       sorting: [{ id: "dateHeld", desc: true }],
     },
-    data: asset.entries.map(
-      (entry) =>
-        ({
-          currencyCode: entry.currencyCode,
-          dateHeld: entry.createdAt,
-          id: entry.id,
-          objectId: entry.objectId,
-          totalValue: new Decimal(entry.totalValue),
-          totalValueBaseCurrency:
-            entry.currencyCode === appSession.user.homeCurrency
-              ? new Decimal(0)
-              : new Decimal(entry.totalValue).mul(
-                  conversionFactors[entry.currencyCode][
-                    appSession.user.homeCurrency
-                  ]
-                ),
-          unitsHeld: new Decimal(entry.unitCount),
-          unitValue: new Decimal(entry.unitValue),
-        } as EntryRow)
-    ),
+    data: entries,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });

@@ -26,7 +26,7 @@ import {
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
 import { useRef } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -55,8 +55,8 @@ export const CreateEntry = ({ assetId }: { assetId: string }) => {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((valuation) => {
-          sendWithAssetId(valuation);
+        onSubmit={form.handleSubmit(async (valuation) => {
+          await sendWithAssetId(valuation);
         })}
         ref={formRef}
         className="space-y-8"
@@ -165,13 +165,11 @@ export const CreateEntry = ({ assetId }: { assetId: string }) => {
             </FormItem>
           )}
         />
-        <Button type="submit">
-          {/* {pending && <Loader2 className="animate-spin" />} */}
+        <Button type="submit" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting && <Loader2 className="animate-spin" />}
           Submit
         </Button>
       </form>
     </Form>
   );
-
-  return <></>;
 };
