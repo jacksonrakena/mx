@@ -38,7 +38,9 @@ export const requestConversionFactorsTable =
           .map((r) => ({ base: r[0], target: r[1] })),
       }),
     }).then((d) => d.json());
-    const response = data.rates[Object.keys(data.rates)[0]];
+    const allDates = Object.keys(data.rates);
+    if (allDates.length === 0) return {} as any;
+    const response = data.rates[allDates[allDates.length - 20]];
     console.log(response);
     return response;
   };
