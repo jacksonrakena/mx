@@ -1,6 +1,7 @@
 import { authenticate } from "@/app/users";
 import { PrismaClient } from "@prisma/client";
 import { Metadata, ResolvingMetadata } from "next";
+import { requestConversionFactorsTable } from "../page";
 import { AssetInfo } from "./_components/AssetInfo";
 const prisma = new PrismaClient();
 
@@ -33,6 +34,7 @@ export default async function AssetInfoPage({
 }) {
   const { id } = await params;
   const auth = await authenticate();
+  const conversionFactors = await requestConversionFactorsTable();
   if (!auth.user) return <></>;
   const asset = await prisma.object.findFirst({
     where: {
@@ -59,6 +61,7 @@ export default async function AssetInfoPage({
             })),
           } as any
         }
+        conversionFactors={conversionFactors}
       />
     </>
   );

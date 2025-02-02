@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 const prisma = new PrismaClient();
 export async function updateHomeCurrency(homeCurrency: $Enums.Currency) {
   const session = await auth();
-  if (!session?.user?.email) return { error: "unauthenticated" };
+  if (!session?.user?.email) return { error: "unauthenticated" }
 
   if (!Object.values($Enums.Currency).includes(homeCurrency)) {
     console.log(`${homeCurrency} is invalid`);

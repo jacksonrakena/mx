@@ -27,7 +27,7 @@ import {
 import { Decimal } from "decimal.js";
 import { MoreHorizontal } from "lucide-react";
 import { useMemo } from "react";
-import { conversionFactors } from "../../page";
+import { ConversionFactorTable } from "../../page";
 import { deleteLedgerEntry } from "../actions";
 import { CreateEntry } from "./CreateEntry";
 
@@ -146,8 +146,10 @@ export const createColumns = (
 
 export const AssetInfo = ({
   asset,
+  conversionFactors,
 }: {
   asset: Prisma.ObjectGetPayload<{ include: { entries: true } }>;
+  conversionFactors: ConversionFactorTable;
 }) => {
   const appSession = useAppSession() as AuthenticatedAppSession;
   const columns = useMemo(() => createColumns(appSession), [appSession]);

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Currency, Prisma, PrismaClient } from "@prisma/client";
 import { add, format, isBefore } from "date-fns";
 import { calculateBaseValue, calculateEntryBaseValue } from "../page";
@@ -16,39 +17,36 @@ export type ObjectWithLatestEntry = {
 type ConversionsTo<HomeCurrency extends string> = Record<HomeCurrency, 1> & {
   [key in Currency]: number;
 };
-type ConversionFactorTable = {
+export type ConversionFactorTable = {
   [key in Currency]: ConversionsTo<key>;
 };
-export const conversionFactors: ConversionFactorTable = {
-  NZD: {
-    AUD: 0.9,
-    USD: 0.56,
-    HKD: 4.35,
-    NZD: 1.0,
-  },
-  USD: {
-    NZD: 1.8,
-    HKD: 7.79,
-    AUD: 1.63,
-    USD: 1.0,
-  },
-  AUD: {
-    NZD: 1.11,
-    HKD: 4.79,
-    USD: 0.61,
-    AUD: 1.0,
-  },
-  HKD: {
-    USD: 0.13,
-    NZD: 0.23,
-    AUD: 0.21,
-    HKD: 1.0,
-  },
-};
+export const requestConversionFactorsTable =
+  async (): Promise<ConversionFactorTable> => {
+    const data = await fetch(process.env.MIXER_API_HOST + "/currency/query", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        instruments: Object.values(Currency)
+          .map((currency) =>
+            Object.values(Currency)
+              .filter((e) => e != currency)
+              .map((e) => [currency, e])
+          )
+          .flat()
+          .map((r) => ({ base: r[0], target: r[1] })),
+      }),
+    }).then((d) => d.json());
+    const response = data.rates[Object.keys(data.rates)[0]];
+    console.log(response);
+    return response;
+  };
 export default async function Assets() {
   const session = await authenticate();
   if (!session.user) return <></>;
 
+  const conversionFactors = await requestConversionFactorsTable();
   const objects = await prisma.object.findMany({
     where: {
       ownerId: session.user.id ?? "",
@@ -104,7 +102,8 @@ export default async function Assets() {
           ent[entry.object.name] = calculateEntryBaseValue(
             entry.currencyCode,
             entry.totalValue,
-            session.user.homeCurrency
+            session.user.homeCurrency,
+            conversionFactors
           );
         }
         return ent;
@@ -128,7 +127,8 @@ export default async function Assets() {
                   ...row,
                   entries: [row.entry!],
                 },
-                session.user.homeCurrency
+                session.user.homeCurrency,
+                conversionFactors
               ).toString()
             : "0",
           type: row.object.type,
@@ -140,7 +140,8 @@ export default async function Assets() {
                   ...row,
                   entries: [row.entry!],
                 },
-                session.user.homeCurrency
+                session.user.homeCurrency,
+                conversionFactors
               )
             : 0,
         }))}
@@ -206,7 +207,7 @@ const colorScheme = [
   "#54a0ff",
   "#01a3a4",
 ];
-var stringToColor = (string: string, saturation = 100, lightness = 50) => {
+const stringToColor = (string: string, saturation = 100, lightness = 50) => {
   let hash = 0;
   for (let i = 0; i < string.length; i++) {
     hash = string.charCodeAt(i) + ((hash << 5) - hash);

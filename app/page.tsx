@@ -15,7 +15,10 @@ import {
 } from "@/components/ui/table";
 import { Currency, PrismaClient } from "@prisma/client";
 import { Decimal } from "@prisma/client/runtime/library";
-import { conversionFactors } from "./assets/page";
+import {
+  ConversionFactorTable,
+  requestConversionFactorsTable,
+} from "./assets/page";
 import { Charts } from "./components/Charts";
 import { authenticate } from "./users";
 
@@ -23,7 +26,8 @@ const prisma = new PrismaClient();
 export const calculateEntryBaseValue = (
   currencyCode: Currency,
   totalValue: Decimal,
-  homeCurrency: Currency
+  homeCurrency: Currency,
+  conversionFactors: ConversionFactorTable
 ) => {
   return currencyCode === homeCurrency
     ? totalValue.toNumber()
@@ -33,29 +37,37 @@ export const calculateBaseValue = (
   asset: {
     entries: { currencyCode: Currency; totalValue: Decimal }[];
   },
-  homeCurrency: Currency
+  homeCurrency: Currency,
+  conversionFactors: ConversionFactorTable
 ) => {
   if (asset.entries.length === 0) return 0;
   return calculateEntryBaseValue(
     asset.entries[0].currencyCode,
     asset.entries[0].totalValue,
-    homeCurrency
+    homeCurrency,
+    conversionFactors
   );
 };
 const MulticurrencyValue = ({
   asset,
   homeCurrency,
+  conversionFactors,
 }: {
   asset: {
     entries: { currencyCode: Currency; totalValue: Decimal }[];
   };
   homeCurrency: Currency;
+  conversionFactors: ConversionFactorTable;
 }) => {
   return (
     <div className="flex flex-col">
       <div>
         {homeCurrency}$
-        {calculateBaseValue(asset, homeCurrency).toLocaleString([], {
+        {calculateBaseValue(
+          asset,
+          homeCurrency,
+          conversionFactors
+        ).toLocaleString([], {
           maximumFractionDigits: 2,
         })}
       </div>
@@ -74,6 +86,7 @@ const MulticurrencyValue = ({
 export default async function Overview() {
   const session = await authenticate();
   if (!session.user) return <></>;
+  const conversionFactors = await requestConversionFactorsTable();
 
   const joined = await prisma.object.findMany({
     where: {
@@ -188,8 +201,16 @@ export default async function Overview() {
                         {assets
                           .toSorted(
                             (b, a) =>
-                              calculateBaseValue(a, session.user.homeCurrency) -
-                              calculateBaseValue(b, session.user.homeCurrency)
+                              calculateBaseValue(
+                                a,
+                                session.user.homeCurrency,
+                                conversionFactors
+                              ) -
+                              calculateBaseValue(
+                                b,
+                                session.user.homeCurrency,
+                                conversionFactors
+                              )
                           )
                           .slice(0, 5)
                           .map((a) => (
@@ -201,6 +222,7 @@ export default async function Overview() {
                                 <MulticurrencyValue
                                   asset={a}
                                   homeCurrency={session.user.homeCurrency}
+                                  conversionFactors={conversionFactors}
                                 />
                               </TableCell>
                             </TableRow>
@@ -244,8 +266,16 @@ export default async function Overview() {
                         {liabilities
                           .toSorted(
                             (b, a) =>
-                              calculateBaseValue(a, session.user.homeCurrency) -
-                              calculateBaseValue(b, session.user.homeCurrency)
+                              calculateBaseValue(
+                                a,
+                                session.user.homeCurrency,
+                                conversionFactors
+                              ) -
+                              calculateBaseValue(
+                                b,
+                                session.user.homeCurrency,
+                                conversionFactors
+                              )
                           )
                           .slice(0, 5)
                           .map((a) => (
@@ -255,6 +285,7 @@ export default async function Overview() {
                                 <MulticurrencyValue
                                   asset={a}
                                   homeCurrency={session.user.homeCurrency}
+                                  conversionFactors={conversionFactors}
                                 />
                               </TableCell>
                             </TableRow>
