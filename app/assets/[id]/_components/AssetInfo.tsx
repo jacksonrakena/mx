@@ -195,7 +195,12 @@ export const AssetInfo = ({
         <CustomTable table={table} columns={columns}>
           {table.getRowCount() !== 0 && <DataTablePagination table={table} />}
         </CustomTable>
-        <CreateEntry assetId={asset.id} />
+        <CreateEntry
+          assetId={asset.id}
+          defaultCurrency={
+            entries[0].currencyCode ?? appSession.user.homeCurrency
+          }
+        />
       </div>
     </>
   );

@@ -6,8 +6,6 @@ import { useAppSession } from "@/app/providers/AppSessionProvider";
 import {
   ChartConfig,
   ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
@@ -77,13 +75,15 @@ export const AssetChart = ({
         <XAxis
           dataKey="name"
           tickFormatter={(value) => {
-            console.log(value);
-            console.log(new Date(value));
             return monthTickFormatter.format(new Date(value));
           }}
         />
-        <YAxis />
-        <ChartLegend content={<ChartLegendContent />} />
+        <YAxis
+          tickFormatter={(value) =>
+            ` \$${currencyFormatter.format(value as number)}`
+          }
+        />
+        {/* <ChartLegend content={<ChartLegendContent />} /> */}
 
         <ChartTooltip
           content={

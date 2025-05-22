@@ -116,6 +116,16 @@ export default async function Assets() {
   return (
     <>
       <div className="text-xl font-bold">Your assets</div>
+      <div className="max-w-3xl">
+        <AssetChart
+          lines={objects.map((e, i) => ({
+            color:
+              i < colorScheme.length ? colorScheme[i] : stringToColor(e.name),
+            key: e.name,
+          }))}
+          data={data}
+        />
+      </div>
       <AssetTable
         data={joined.map((row) => ({
           id: row.object.id,
@@ -148,16 +158,7 @@ export default async function Assets() {
             : 0,
         }))}
       />
-      <div className="max-w-3xl">
-        <AssetChart
-          lines={objects.map((e, i) => ({
-            color:
-              i < colorScheme.length ? colorScheme[i] : stringToColor(e.name),
-            key: e.name,
-          }))}
-          data={data}
-        />
-      </div>
+
       <CreateAsset />
     </>
   );
